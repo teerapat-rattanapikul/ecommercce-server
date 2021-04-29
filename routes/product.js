@@ -2,7 +2,7 @@ const router = require("express").Router();
 const ProductController = require("../controllers/product");
 const upload = require("../multer/config");
 
-router.post("/getAll", ProductController.getAllListProduct);
+router.post("/merChantGetAll", ProductController.merChantGetAllProduct);
 router.post("/getDetail", ProductController.getProductDetail);
 router.post(
   "/addProduct",

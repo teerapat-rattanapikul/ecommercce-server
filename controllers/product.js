@@ -2,7 +2,7 @@ const ProductModel = require("../models/product");
 const { Op } = require("sequelize");
 const fs = require("fs");
 module.exports = {
-  getAllListProduct: async (req, res) => {
+  merChantGetAllProduct: async (req, res) => {
     const productList = await ProductModel.findAll(
       { where: { shopId: req.body.shopId } },
       {
@@ -26,6 +26,7 @@ module.exports = {
       price: req.body.productPrice,
       amount: req.body.productAmount,
       image: req.file.path,
+      status: false,
     });
     res.json(true);
   },
@@ -42,6 +43,7 @@ module.exports = {
         price: req.body.productPrice,
         amount: req.body.productAmount,
         image: req.body.image,
+        status: req.body.productStatus,
       },
       { where: { id: req.body.productId } }
     );

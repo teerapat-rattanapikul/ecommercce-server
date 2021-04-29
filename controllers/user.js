@@ -9,6 +9,10 @@ module.exports = {
       });
       if (result) {
         if (req.body.password === result.password) {
+          await UserModel.update(
+            { email: req.body.email },
+            { where: { email: req.body.email } }
+          );
           return res.json({ ...result, status: true });
         }
       }
@@ -73,6 +77,35 @@ module.exports = {
         role: "staff",
       });
       res.json(true);
+    } catch (error) {
+      throw error;
+    }
+  },
+  log: async (req, res) => {
+    console.log(req.body.shopId);
+    try {
+      // const user = await UserShopModel.findAll({
+      //   include: { model: UserModel },
+      // where: {
+      //   [Op.and]: [
+      //     { shopId: req.body.shopId },
+      //     { role: { [Op.not]: "admin" } },
+      //   ],
+      // },
+      // });
+      const user = await UserModel.findAll({
+        include: {
+          model: UserShopModel,
+          where: {
+            [Op.and]: [
+              { shopId: req.body.shopId },
+              { role: { [Op.not]: "admin" } },
+            ],
+          },
+        },
+        order: [["updatedAt", "DESC"]],
+      });
+      res.json(user);
     } catch (error) {
       throw error;
     }

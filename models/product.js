@@ -23,6 +23,10 @@ const ProductModel = sequelize.define("product", {
     type: Sequelize.INTEGER,
     allowNull: false,
   },
+  status: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+  },
 });
 
 ProductModel.belongsTo(ShopModel, { constraints: true, onDelete: "CASCADE" });
