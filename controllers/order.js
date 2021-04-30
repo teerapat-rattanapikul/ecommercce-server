@@ -1,6 +1,8 @@
 const OrderModel = require("../models/order");
 const OrderLogModel = require("../models/orderLog");
 const ProductModel = require("../models/product");
+const UserModel = require("../models/user");
+const { Op } = require("sequelize");
 module.exports = {
   addOrder: async (req, res) => {
     const order = await OrderModel.create({
@@ -43,7 +45,8 @@ module.exports = {
   },
   getLogDetail: async (req, res) => {
     const orderLog = await OrderLogModel.findAll({
-      include: { model: OrderModel, include: { model: ProductModel } },
+      include: { model: UserModel },
+
       where: { orderId: req.body.orderId },
       order: [["createdAt", "DESC"]],
     });

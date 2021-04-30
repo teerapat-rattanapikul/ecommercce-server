@@ -40,4 +40,17 @@ module.exports = {
       res.json(shopList);
     } catch (error) {}
   },
+  getShopbyId: async (req, res) => {
+    try {
+      const shop = await UserShopModel.findOne({
+        include: { model: ShopModel, attributes: ["name"] },
+        where: {
+          [Op.and]: [{ shopId: req.body.shopId }, { userId: req.body.userId }],
+        },
+      });
+      res.json(shop);
+    } catch (error) {
+      throw error;
+    }
+  },
 };
