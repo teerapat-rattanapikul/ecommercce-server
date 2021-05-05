@@ -13,7 +13,7 @@ async function sendEmail(mail) {
     });
 
     let info = await transporter.sendMail({
-      from: "teerapat@digio.co.th",
+      from: `${process.env.SENDEREMAIL}`,
       to: mail,
       subject: "การดำเนินการสั่งซื้อสินค้า",
       text: "การสั่งซื้อถูกต้อง ทางเรากำลังจัดส่งสินค้า ขอบคุณที่ใช้บริการ",
