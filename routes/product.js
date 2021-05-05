@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const ProductController = require("../controllers/product");
+const ProductModel = require("../models/product");
 const upload = require("../multer/config");
 
 router.post("/merChantGetAll", ProductController.merChantGetAllProduct);
@@ -14,5 +15,6 @@ router.post(
   upload.single("productImage"),
   ProductController.updateProduct
 );
-
+router.post("/customerGet", ProductController.customerGetproductByShopID);
+router.post("/customerGetDetail", ProductController.customerGetproductDetail);
 module.exports = router;

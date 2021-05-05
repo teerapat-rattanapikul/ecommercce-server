@@ -1,7 +1,9 @@
 const UserModel = require("../models/user");
 const UserShopModel = require("../models/user_shop");
+const OrderModel = require("../models/order");
 const genJWT = require("../services/genJWT");
 const { Op } = require("sequelize");
+const ShopModel = require("../models/shop");
 module.exports = {
   login: async (req, res) => {
     var errorMsg = "";
@@ -64,9 +66,15 @@ module.exports = {
   },
   getUsertoHire: async (req, res) => {
     try {
+      const userAccess = await UserShopModel.findOne({
+        where: {
+          [Op.and]: [{ userId: req.body.userId, shopId: req.body.shopId }],
+        },
+      });
+      if (userAccess === null) return res.json(null);
       const getUser = await UserModel.findAll({
         where: {
-          id: { [Op.not]: req.body.id },
+          id: { [Op.not]: req.body.userId },
         },
         attributes: ["id", "email", "name"],
       });
@@ -105,8 +113,17 @@ module.exports = {
     }
   },
   log: async (req, res) => {
-    console.log(req.body.shopId);
     try {
+      const userAccess = await UserShopModel.findOne({
+        where: {
+          [Op.and]: [
+            { userId: req.body.userId },
+            { role: "admin" },
+            { shopId: req.body.shopId },
+          ],
+        },
+      });
+      if (userAccess === null) return res.json(null);
       const user = await UserModel.findAll({
         include: {
           model: UserShopModel,
@@ -123,5 +140,22 @@ module.exports = {
     } catch (error) {
       throw error;
     }
+  },
+  customerBuyProduct: async (req, res) => {
+    await OrderModel.update(
+      {
+        status: "Paid",
+        totalAmount: req.body.totalAmount,
+        totalPrice: req.body.totalPrice,
+      },
+      { where: { id: req.body.orderId } }
+    );
+    res.json(true);
+  },
+  customerCancleProduct: async (req, res) => {
+    await OrderModel.destroy({
+      where: { id: req.body.orderId },
+    });
+    res.json(true);
   },
 };

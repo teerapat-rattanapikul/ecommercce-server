@@ -1,5 +1,6 @@
 const ShopModel = require("../models/shop");
 const UserShopModel = require("../models/user_shop");
+const ProductModel = require("../models/product");
 const { Op } = require("sequelize");
 module.exports = {
   addShop: async (req, res) => {
@@ -52,5 +53,25 @@ module.exports = {
     } catch (error) {
       throw error;
     }
+  },
+  getAllShop: async (req, res) => {
+    try {
+      const ShopList = await ShopModel.findAll();
+      res.json(ShopList);
+    } catch (error) {}
+  },
+  search: async (req, res) => {
+    const shopList = await ShopModel.findAll({
+      where: { name: { [Op.like]: `%${req.body.search}%` } },
+    });
+    const productList = await ProductModel.findAll({
+      where: {
+        [Op.and]: [
+          { name: { [Op.like]: `%${req.body.search}%` } },
+          { status: true },
+        ],
+      },
+    });
+    res.json({ shopList: shopList, productList: productList });
   },
 };

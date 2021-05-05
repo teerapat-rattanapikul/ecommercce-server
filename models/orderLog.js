@@ -18,6 +18,10 @@ const OrderLogModel = sequelize.define("orderLog", {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  staff: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
 });
 OrderLogModel.belongsTo(OrderModel, { constraints: true, onDelete: "CASCADE" });
 OrderModel.hasMany(OrderLogModel);

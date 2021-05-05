@@ -7,6 +7,8 @@ router.post("/register", UserController.register);
 router.post("/getUsertoHire", UserController.getUsertoHire);
 router.post("/hireStaff", UserController.hireUser);
 router.post("/log", UserController.log);
-router.post("/tokenCheck", verifyJWT(), UserController.tokenCheck);
+router.get("/tokenCheck", verifyJWT(), UserController.tokenCheck);
+router.post("/buy", UserController.customerBuyProduct);
+router.post("/cancle", UserController.customerCancleProduct);
 
 module.exports = router;
