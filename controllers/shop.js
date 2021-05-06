@@ -10,11 +10,20 @@ module.exports = {
         where: { name: req.body.shopName },
       });
 
+      if (checkNameShop !== null) {
+        return res.json({
+          status: false,
+          errMsg: "คุณไม่สามารถใช้ชื่อร้านนี้ได้",
+        });
+      }
       const checkSameId = await UserShopModel.findOne({
         where: { [Op.and]: [{ userId: req.body.id }, { role: "admin" }] },
       });
-      if (checkNameShop !== null || checkSameId !== null) {
-        return res.json(false);
+      if (checkSameId !== null) {
+        return res.json({
+          status: false,
+          errMsg: "คุณสามารถตั้งร้านได้แค่ร้านเดียวเท่านั้น",
+        });
       }
       const createShop = await ShopModel.create({
         name: req.body.shopName,
@@ -24,7 +33,7 @@ module.exports = {
         shopId: createShop.id,
         role: "admin",
       });
-      res.json(true);
+      res.json({ status: true });
     } catch (error) {
       throw error;
     }
