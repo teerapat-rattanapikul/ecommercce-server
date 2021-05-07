@@ -66,40 +66,44 @@ module.exports = {
   },
   getUsertoHire: async (req, res) => {
     try {
-      const userAccess = await UserShopModel.findOne({
-        where: {
-          [Op.and]: [{ userId: req.body.userId, shopId: req.body.shopId }],
-        },
-      });
-      if (userAccess === null) return res.json(null);
-      const getUser = await UserModel.findAll({
-        where: {
-          id: { [Op.not]: req.body.userId },
-        },
-        attributes: ["id", "email", "name"],
-      });
-      const userList = { userList: getUser };
-      const getUserShop = await UserShopModel.findAll({
-        where: {
-          [Op.and]: [
-            { shopId: req.body.shopId },
-            { role: { [Op.not]: "admin" } },
-          ],
-        },
-        attributes: ["userId"],
-      });
-      const staffList = [];
-      getUserShop.map((staff) => {
-        staffList.push(staff.userId);
-      });
-      userList["staffList"] = staffList;
-      res.json(userList);
+      if (req.id !== null) {
+        const userAccess = await UserShopModel.findOne({
+          where: {
+            [Op.and]: [{ userId: req.id, shopId: req.body.shopId }],
+          },
+        });
+        if (userAccess === null || userAccess.role === "staff")
+          return res.json({ status: false });
+        const getUser = await UserModel.findAll({
+          where: {
+            id: { [Op.not]: req.id },
+          },
+          attributes: ["id", "email", "name"],
+        });
+        const userList = { userList: getUser, merchant: req.id };
+        const getUserShop = await UserShopModel.findAll({
+          where: {
+            [Op.and]: [
+              { shopId: req.body.shopId },
+              { role: { [Op.not]: "admin" } },
+            ],
+          },
+          attributes: ["userId"],
+        });
+        const staffList = [];
+        getUserShop.map((staff) => {
+          staffList.push(staff.userId);
+        });
+        userList["staffList"] = staffList;
+        res.json(userList);
+      } else {
+        res.json({ status: false });
+      }
     } catch (error) {
       throw error;
     }
   },
   hireUser: async (req, res) => {
-    console.log(req.body);
     try {
       await UserShopModel.create({
         userId: req.body.userId,
@@ -112,31 +116,47 @@ module.exports = {
       throw error;
     }
   },
+  unHireUser: async (req, res) => {
+    try {
+      await UserShopModel.destroy({
+        where: {
+          [Op.and]: [{ userId: req.body.userId }, { shopId: req.body.shopId }],
+        },
+      });
+      res.json(true);
+    } catch (error) {
+      throw error;
+    }
+  },
   log: async (req, res) => {
     try {
-      const userAccess = await UserShopModel.findOne({
-        where: {
-          [Op.and]: [
-            { userId: req.body.userId },
-            { role: "admin" },
-            { shopId: req.body.shopId },
-          ],
-        },
-      });
-      if (userAccess === null) return res.json(null);
-      const user = await UserModel.findAll({
-        include: {
-          model: UserShopModel,
+      if (req.id !== null) {
+        const userAccess = await UserShopModel.findOne({
           where: {
             [Op.and]: [
+              { userId: req.id },
+              { role: "admin" },
               { shopId: req.body.shopId },
-              { role: { [Op.not]: "admin" } },
             ],
           },
-        },
-        order: [["updatedAt", "DESC"]],
-      });
-      res.json(user);
+        });
+        if (userAccess === null) return res.json({ status: false });
+        const user = await UserModel.findAll({
+          include: {
+            model: UserShopModel,
+            where: {
+              [Op.and]: [
+                { shopId: req.body.shopId },
+                { role: { [Op.not]: "admin" } },
+              ],
+            },
+          },
+          order: [["updatedAt", "DESC"]],
+        });
+        res.json({ merchant: req.id, staff: user, status: true });
+      } else {
+        res.json({ status: false });
+      }
     } catch (error) {
       throw error;
     }

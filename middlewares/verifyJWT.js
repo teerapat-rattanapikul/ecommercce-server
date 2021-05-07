@@ -14,7 +14,7 @@ module.exports = () => (req, res, next) => {
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      error.status = 401;
+      error.status = false;
     }
     res.json(error);
   }

@@ -1,10 +1,14 @@
 const router = require("express").Router();
 const ProductController = require("../controllers/product");
-const ProductModel = require("../models/product");
 const upload = require("../multer/config");
+const verifyJWT = require("../middlewares/verifyJWT");
 
-router.post("/merChantGetAll", ProductController.merChantGetAllProduct);
-router.post("/getDetail", ProductController.getProductDetail);
+router.post(
+  "/merChantGetAll",
+  verifyJWT(),
+  ProductController.merChantGetAllProduct
+);
+router.post("/getDetail", verifyJWT(), ProductController.getProductDetail);
 router.post(
   "/addProduct",
   upload.single("productImage"),

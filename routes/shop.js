@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const ShopController = require("../controllers/shop");
-
+const verifyJWT = require("../middlewares/verifyJWT");
 router.post("/addShop", ShopController.addShop);
-router.post("/getShop", ShopController.getShop);
-router.post("/getShopById", ShopController.getShopbyId);
+router.get("/getShop", verifyJWT(), ShopController.getShop);
+router.post("/getShopById", verifyJWT(), ShopController.getShopbyId);
 router.get("/allShop", ShopController.getAllShop);
 router.post("/search", ShopController.search);
 module.exports = router;

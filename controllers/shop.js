@@ -40,25 +40,34 @@ module.exports = {
   },
   getShop: async (req, res) => {
     try {
-      const shopList = await UserShopModel.findAll({
-        include: { model: ShopModel, attributes: ["name"] },
-        where: { userId: req.body.id },
-      });
-      if (shopList === null) {
-        return res.json([]);
+      if (req.id !== null) {
+        const shopList = await UserShopModel.findAll({
+          include: { model: ShopModel, attributes: ["name"] },
+          where: { userId: req.id },
+          order: [["role", "ASC"]],
+        });
+        if (shopList === null) {
+          return res.json([]);
+        }
+        res.json(shopList);
+      } else {
+        res.json({ status: false });
       }
-      res.json(shopList);
     } catch (error) {}
   },
   getShopbyId: async (req, res) => {
     try {
-      const shop = await UserShopModel.findOne({
-        include: { model: ShopModel, attributes: ["name"] },
-        where: {
-          [Op.and]: [{ shopId: req.body.shopId }, { userId: req.body.userId }],
-        },
-      });
-      res.json(shop);
+      if (req.id) {
+        const shop = await UserShopModel.findOne({
+          include: { model: ShopModel, attributes: ["name"] },
+          where: {
+            [Op.and]: [{ shopId: req.body.shopId }, { userId: req.id }],
+          },
+        });
+        res.json(shop);
+      } else {
+        res.json({ status: false });
+      }
     } catch (error) {
       throw error;
     }

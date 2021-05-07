@@ -20,38 +20,45 @@ module.exports = {
   },
   merChantGetOrder: async (req, res) => {
     try {
-      const order = await OrderModel.findAll({
-        include: { model: ProductModel },
-        where: {
-          [Op.and]: [
-            { shopId: req.body.shopId },
-            {
-              [Op.and]: [
-                { status: { [Op.not]: "Waiting" } },
-                { status: { [Op.not]: "Paid" } },
-              ],
-            },
-          ],
-        },
-      });
-      res.json(order);
-      // res.json(true);
+      if (req.id !== null) {
+        const order = await OrderModel.findAll({
+          include: { model: ProductModel },
+          where: {
+            [Op.and]: [
+              { shopId: req.body.shopId },
+              {
+                [Op.and]: [
+                  { status: { [Op.not]: "Waiting" } },
+                  { status: { [Op.not]: "Paid" } },
+                ],
+              },
+            ],
+          },
+        });
+        res.json(order);
+      } else {
+        res.json({ status: false });
+      }
     } catch (error) {
       throw error;
     }
   },
   getOrderbyShopId: async (req, res) => {
     try {
-      const shop = await UserShopModel.findOne({
-        include: {
-          model: ShopModel,
-          include: { model: OrderModel, include: { model: ProductModel } },
-        },
-        where: {
-          [Op.and]: [{ shopId: req.body.shopId }, { userId: req.body.userId }],
-        },
-      });
-      res.json(shop);
+      if (req.id !== null) {
+        const shop = await UserShopModel.findOne({
+          include: {
+            model: ShopModel,
+            include: { model: OrderModel, include: { model: ProductModel } },
+          },
+          where: {
+            [Op.and]: [{ shopId: req.body.shopId }, { userId: req.id }],
+          },
+        });
+        res.json(shop);
+      } else {
+        res.json({ status: false });
+      }
     } catch (error) {
       throw error;
     }
@@ -71,6 +78,17 @@ module.exports = {
     );
     if (order.status === "Paid" && req.body.status === "Shipping") {
       sendEmail(order.user.email);
+      await ProductModel.decrement(
+        { amount: order.totalAmount },
+        { where: { id: order.productId } }
+      );
+    }
+
+    if (order.status === "Shipping" && req.body.status === "Cancle") {
+      await ProductModel.increment(
+        { amount: order.totalAmount },
+        { where: { id: order.productId } }
+      );
     }
     await OrderLogModel.create({
       orderId: req.body.orderId,
